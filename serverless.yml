@@ -3,14 +3,18 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: nodejs12.x
-  timeout: 30
+  runtime: nodejs14.x
+  timeout: 60
   region: ${file(./config.${self:provider.stage}.json):REGION}
   stage: ${opt:stage,'dev'}
- 
+
+plugins:
+  - serverless-bundle
+  - serverless-dotenv-plugin
+
 functions:
-  generate_node_stubs:
-    handler: stub_handler.generate_node_stubs
+  generateNodeStubs:
+    handler: handlers/generateNodeStubs.handler
     role: ${file(./config.${self:provider.stage}.json):ROLE}
     vpc:
       securityGroupIds:
