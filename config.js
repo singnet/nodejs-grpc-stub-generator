@@ -1,7 +1,6 @@
-const items =
+export const config =
 {
-    "AWS_REGION": "",
-    "S3_STUBS_REGEX_PATTERN": ""
+    "AWS_REGION": "us-east-1",
+    "S3_STUBS_REGEX_PATTERN": ".*(\/proto\/)[^\/.]*(.zip)"
 }
 
-module.exports = {items}
