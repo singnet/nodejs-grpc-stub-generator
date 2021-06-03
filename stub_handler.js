@@ -1,13 +1,13 @@
 import * as os from 'os'
 import * as fs from 'fs'
-import v4 from 'uuid/v4.js'
+import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path'
 import {Lists3objects,getHostAndKeyFromUrl,getS3Objects,putS3Objects,ValidateUrlForS3} from './lib/s3botoutils.js'
 // import {extractFile,ZipFile} from './lib/fileutils.js'
 // import {extractStubs} from './lib/stubscriptutils.js'
 
 const tmp = os.tmpdir()
-const unique_id = v4()
+const unique_id = uuidv4()
 const download_file = path.join(tmp, `${unique_id}_download.zip`)
 const extracted_file = path.join(tmp, `${unique_id}_extracted`)
 const output_path = path.join(tmp, `${unique_id}_results`)
