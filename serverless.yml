@@ -1,0 +1,37 @@
+service: nodestubs
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  timeout: 60
+  region: ${file(./config.${self:provider.stage}.json):REGION}
+  stage: ${opt:stage,'dev'}
+
+custom:
+  bundle:
+    forceInclude: # Optional list of NPM packages that need to be included
+      - protoc
+      - google-protobuf
+      - grpc-tools
+      - protoc-gen-ts
+      - ts-protoc-gen
+      - typescript
+    copyFiles: # Copy any additional files to the generated package
+      - from: '/proto'
+        to: './proto' 
+plugins:
+  - serverless-bundle
+  - serverless-dotenv-plugin
+
+functions:
+  generateNodeStubs:
+    handler: handlers/generateNodeStubs.handler
+    role: ${file(./config.${self:provider.stage}.json):ROLE}
+    vpc:
+      securityGroupIds:
+        - ${file(./config.${self:provider.stage}.json):SG1}
+        - ${file(./config.${self:provider.stage}.json):SG2}
+      subnetIds:
+        - ${file(./config.${self:provider.stage}.json):VPC1}
+        - ${file(./config.${self:provider.stage}.json):VPC2}
