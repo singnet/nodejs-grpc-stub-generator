@@ -1,0 +1,1 @@
+$1 --plugin=protoc-gen-ts=$2 --js_out=import_style=commonjs,binary:$3 --ts_out=service=grpc-web:$3 $4
