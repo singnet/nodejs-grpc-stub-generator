@@ -46,7 +46,7 @@ export const handler = async (event) => {
       }
     }
     await ZipFile(generatedStubLocation, `${tmp}/nodejs.zip`);
-    putS3Objects(stub.host, `${stub.path}/nodejs.zip`, `${tmp}/nodejs.zip`);
+    await putS3Objects(stub.host, `${stub.path}/nodejs.zip`, `${tmp}/nodejs.zip`);
     return { status: "success" };
   } catch (err) {
     console.log(`Error encountered :: ${err}`);
