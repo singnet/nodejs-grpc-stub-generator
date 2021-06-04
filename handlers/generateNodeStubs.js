@@ -53,10 +53,3 @@ export const handler = async (event) => {
     throw err;
   }
 };
-
-// const b = generate_node_stubs(
-//      {
-//         "proto_s3_url": "s3://ropsten-marketplace-service-assets/e3fc7c71bee8401095c6db0bf523089f/services/c491f90627c447c199b24b62ddd649ba/proto",
-//         "stub_s3_url": "s3://ropsten-marketplace-service-assets/e3fc7c71bee8401095c6db0bf523089f/services/c491f90627c447c199b24b62ddd649ba/proto/stubs"
-//     }
-// )
