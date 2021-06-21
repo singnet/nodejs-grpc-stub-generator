@@ -8,7 +8,7 @@ import {
 } from "../lib/s3botoutils.js";
 import { ZipFile, getProtoPaths } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
-import { s3Events } from "../lib/awsEvents.js";
+import {s3Events} from "../lib/constants.js"
 
 const tmp = os.tmpdir();
 const unique_id = uuidv4();
@@ -22,7 +22,7 @@ const temporary_paths = {
 export const handler = async (event) => {
   try {
     console.log(`Generate proto :: ${JSON.stringify(event)}`);
-    if (event["output_s3_path"].length > 0) {
+    if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       var output = getHostAndKeyFromUrl(event[s3Events.OUTPUT_S3_PATH]);
     }
     var input = getHostAndKeyFromUrl(event[s3Events.INPUT_S3_PATH]);
