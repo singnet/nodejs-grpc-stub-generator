@@ -8,6 +8,7 @@ import {
 } from "../lib/s3botoutils.js";
 import { ZipFile, getProtoPaths } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
+import { s3Events } from "../lib/awsEvents.js";
 
 const tmp = os.tmpdir();
 const unique_id = uuidv4();
@@ -22,9 +23,9 @@ export const handler = async (event) => {
   try {
     console.log(`Generate proto :: ${JSON.stringify(event)}`);
     if (event["output_s3_path"].length > 0) {
-      var output = getHostAndKeyFromUrl(event["output_s3_path"]);
+      var output = getHostAndKeyFromUrl(event[s3Events.OUTPUT_S3_PATH]);
     }
-    var input = getHostAndKeyFromUrl(event["input_s3_path"]);
+    var input = getHostAndKeyFromUrl(event[s3Events.INPUT_S3_PATH]);
     await getS3FolderContents(input.host, input.path, temporary_paths.base);
     var proto_paths = await getProtoPaths(base);
     if (proto_paths.length == 0) {
@@ -36,7 +37,7 @@ export const handler = async (event) => {
         temporary_paths.result
       );
     }
-    if (event["output_s3_path"].length > 0) {
+    if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       await ZipFile(
         path.join(temporary_paths.result, `${unique_id}_download`),
         temporary_paths.upload
