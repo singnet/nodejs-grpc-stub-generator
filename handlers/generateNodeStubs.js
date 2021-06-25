@@ -8,7 +8,7 @@ import {
 } from "../lib/s3botoutils.js";
 import { ZipFile, getProtoPaths } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
-import {s3Events} from "../lib/constants.js"
+import { s3Events } from "../lib/constants.js";
 
 const tmp = os.tmpdir();
 const unique_id = uuidv4();
