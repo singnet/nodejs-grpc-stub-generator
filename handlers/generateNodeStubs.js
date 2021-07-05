@@ -38,7 +38,7 @@ export const handler = async (event) => {
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
-      await ZipFile(temporary_paths.result,temporary_paths.upload);
+      await ZipFile(temporary_paths.result, temporary_paths.upload);
       await putS3Objects(
         output.host,
         `${output.path}nodejs.zip`,
@@ -48,6 +48,6 @@ export const handler = async (event) => {
     return { statusCode: 200, status: "success" };
   } catch (err) {
     console.log(`Error encountered :: ${err}`);
-    throw err;  
+    throw err;
   }
 };
