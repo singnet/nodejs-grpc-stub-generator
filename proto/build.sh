@@ -1,1 +1,10 @@
-$1 --plugin=protoc-gen-ts=$2 --js_out=import_style=commonjs,binary:$3 --ts_out=service=grpc-web:$3 $4
+$1 \
+ --js_out=import_style=commonjs,binary:$2 \
+ --grpc_out=$2 \
+ --plugin=protoc-gen-grpc=$3 \
+  -I $4 $5
+
+$1 \
+    --plugin=protoc-gen-ts=$6 \
+    --ts_out=$2 \
+    -I $4 $5
