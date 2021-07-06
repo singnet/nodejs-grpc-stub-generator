@@ -9,7 +9,7 @@ import {
 import { ZipFile, getProtoPaths } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
 import { s3Events } from "../lib/constants.js";
-
+import { InvokeBoilerPlateLambda } from "../lib/invokeBoilerplateLambda.js"
 const tmp = os.tmpdir();
 const unique_id = uuidv4();
 const base = path.join(tmp, `${unique_id}_download`);
@@ -38,6 +38,11 @@ export const handler = async (event) => {
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
+      const output_path_details = output.path.split('/')
+      const boilerPlateResponse = InvokeBoilerPlateLambda(output_path_details[1], output_path_details[2])
+      if (boilerPlateResponse == 'success'){
+        //download boiler plate into --> temporary_paths.result
+      }
       await ZipFile(temporary_paths.result, temporary_paths.upload);
       await putS3Objects(
         output.host,
@@ -51,3 +56,9 @@ export const handler = async (event) => {
     throw err;
   }
 };
+
+const a = handler({
+  input_s3_path:
+    "s3://ropsten-service-components/assets/rajeev_june_25_org/calculator_june_25/proto_extracted/",
+  output_s3_path: "s3://ropsten-service-components/assets/rajeev_june_25_org/calculator_june_25/temp"
+});
