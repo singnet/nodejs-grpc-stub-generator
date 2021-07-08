@@ -5,11 +5,13 @@ import {
   getHostAndKeyFromUrl,
   putS3Objects,
   getS3FolderContents,
+  getS3Objects,
 } from "../lib/s3botoutils.js";
-import { ZipFile, getProtoPaths } from "../lib/fileutils.js";
+import { ZipFile, getProtoPaths, extractFile } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
 import { s3Events } from "../lib/constants.js";
 import { InvokeBoilerPlateLambda } from "../lib/invokeBoilerplateLambda.js"
+import { config } from "../config.js";
 const tmp = os.tmpdir();
 const unique_id = uuidv4();
 const base = path.join(tmp, `${unique_id}_download`);
@@ -17,6 +19,7 @@ const temporary_paths = {
   base: base,
   upload: path.join(tmp, `${unique_id}_upload.zip`),
   result: path.join(tmp, `${unique_id}_nodejs`),
+  boilerplate: path.join(tmp, `${unique_id}_boilerplate.zip`)
 };
 
 export const handler = async (event) => {
@@ -34,14 +37,21 @@ export const handler = async (event) => {
     for (var i = 0; i < proto_paths.length; i++) {
       await extractStubs(
         proto_paths[i].replace("/tmp", "."),
-        temporary_paths.result
+        path.join(temporary_paths.result,"stubs")
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       const output_path_details = output.path.split('/')
-      const boilerPlateResponse = InvokeBoilerPlateLambda(output_path_details[1], output_path_details[2])
-      if (boilerPlateResponse == 'success'){
-        //download boiler plate into --> temporary_paths.result
+      const boilerPlateResponse = await InvokeBoilerPlateLambda(output_path_details[1], output_path_details[2])
+      if (boilerPlateResponse.statusCode == 200){
+        await getS3Objects(
+          config['BOILERPLATE_RESULT_BUCKET'],
+         `assets/${output_path_details[1]}/${output_path_details[2]}/stubs/nodejs-boilerplate.zip`,
+         temporary_paths.boilerplate
+         )
+         await extractFile(
+          temporary_paths.boilerplate,  path.join(temporary_paths.result, 'boilerplate')
+         )
       }
       await ZipFile(temporary_paths.result, temporary_paths.upload);
       await putS3Objects(
@@ -57,8 +67,3 @@ export const handler = async (event) => {
   }
 };
 
-const a = handler({
-  input_s3_path:
-    "s3://ropsten-service-components/assets/rajeev_june_25_org/calculator_june_25/proto_extracted/",
-  output_s3_path: "s3://ropsten-service-components/assets/rajeev_june_25_org/calculator_june_25/temp"
-});
