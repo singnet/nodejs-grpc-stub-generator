@@ -1,7 +1,6 @@
 import * as os from "os";
 import { v4 as uuidv4 } from "uuid";
 import * as path from "path";
-import * as fs from "fs";
 import {
   getHostAndKeyFromUrl,
   putS3Objects,
@@ -42,16 +41,19 @@ export const handler = async (event) => {
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
-
       //upload generated nodejs stubs to S3
-      upload_result_to_s3(output.host, `${output.path}nodejs.zip`, temporary_paths.result)
+      upload_result_to_s3(
+        output.host,
+        `${output.path}nodejs.zip`,
+        temporary_paths.result
+      );
 
-      //generate boilerplate 
+      //generate boilerplate
       const output_path_details = output.path.split("/");
       const boilerPlateResponse = await InvokeBoilerPlateLambda(
         output_path_details[1],
         output_path_details[2],
-        `https://${output.host}.s3.${config['REGION']}.amazonaws.com/${output.path}nodejs.zip`
+        `https://${output.host}.s3.${config["REGION"]}.amazonaws.com/${output.path}nodejs.zip`
       );
       if (boilerPlateResponse.statusCode == 200) {
         await getS3Objects(
@@ -66,8 +68,11 @@ export const handler = async (event) => {
       }
 
       //upload generated nodejs boilerplate and stubs to S3
-      upload_result_to_s3(output.host, `${output.path}nodejs.zip`, temporary_paths.result)
-
+      upload_result_to_s3(
+        output.host,
+        `${output.path}nodejs.zip`,
+        temporary_paths.result
+      );
     }
     return { statusCode: 200, status: "success" };
   } catch (err) {
@@ -79,4 +84,4 @@ export const handler = async (event) => {
 const upload_result_to_s3 = async (bucket, key, file) => {
   await ZipFile(temporary_paths.result, temporary_paths.upload);
   await putS3Objects(bucket, key, temporary_paths.upload);
-}
+};
