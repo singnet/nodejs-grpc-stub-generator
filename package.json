@@ -10,6 +10,7 @@
     "aws-sdk": "^2.908.0",
     "child_process": "^1.0.2",
     "chmodr": "^1.2.0",
+    "extract-zip": "^2.0.1",
     "fs": "0.0.1-security",
     "google-protobuf": "^3.17.2",
     "grpc-tools": "^1.11.1",
