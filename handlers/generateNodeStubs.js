@@ -53,11 +53,11 @@ export const handler = async (event) => {
       const boilerPlateResponse = await InvokeBoilerPlateLambda(
         output_path_details[1],
         output_path_details[2],
-        `https://${output.host}.s3.${config["REGION"]}.amazonaws.com/${output.path}nodejs.zip`
+        `https://${output.host}.s3.${config.REGION}.amazonaws.com/${output.path}nodejs.zip`
       );
       if (boilerPlateResponse.statusCode == 200) {
         await getS3Objects(
-          config["BOILERPLATE_RESULT_BUCKET"],
+          config.BOILERPLATE_RESULT_BUCKET,
           `assets/${output_path_details[1]}/${output_path_details[2]}/stubs/nodejs-boilerplate.zip`,
           temporary_paths.boilerplate
         );
