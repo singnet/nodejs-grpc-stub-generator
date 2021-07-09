@@ -91,7 +91,9 @@ export const handler = async (event) => {
     console.log(`Error encountered :: ${err}`);
     throw err;
   } finally {
-    deleteS3Objects(output.host, `${output.path}nodejstmp.zip`);
+    if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
+      deleteS3Objects(output.host, `${output.path}nodejstmp.zip`);
+    }
   }
 };
 
