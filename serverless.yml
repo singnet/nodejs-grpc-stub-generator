@@ -10,16 +10,11 @@ provider:
 
 custom:
   bundle:
-    forceInclude: # Optional list of NPM packages that need to be included
-      - protoc
-      - google-protobuf
-      - grpc-tools
-      - protoc-gen-ts
-      - ts-protoc-gen
-      - typescript
     copyFiles: # Copy any additional files to the generated package
       - from: '/proto'
         to: './proto' 
+      - from: '/node_modules'
+        to: './node_modules'
 plugins:
   - serverless-bundle
   - serverless-dotenv-plugin
