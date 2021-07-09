@@ -6,8 +6,14 @@ import {
   putS3Objects,
   getS3FolderContents,
   getS3Objects,
+  deleteS3Objects,
 } from "../lib/s3botoutils.js";
-import { ZipFile, getProtoPaths, extractFile } from "../lib/fileutils.js";
+import {
+  ZipFile,
+  getProtoPaths,
+  extractFile,
+  clearDirectory,
+} from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
 import { s3Events } from "../lib/constants.js";
 import { InvokeBoilerPlateLambda } from "../lib/invokeBoilerplateLambda.js";
@@ -25,6 +31,7 @@ const temporary_paths = {
 export const handler = async (event) => {
   try {
     console.log(`Generate proto :: ${JSON.stringify(event)}`);
+    await clearDirectory(tmp);
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       var output = getHostAndKeyFromUrl(event[s3Events.OUTPUT_S3_PATH]);
     }
@@ -44,7 +51,7 @@ export const handler = async (event) => {
       //upload generated nodejs stubs to S3
       upload_result_to_s3(
         output.host,
-        `${output.path}nodejs.zip`,
+        `${output.path}nodejstmp.zip`,
         temporary_paths.result
       );
 
@@ -53,7 +60,7 @@ export const handler = async (event) => {
       const boilerPlateResponse = await InvokeBoilerPlateLambda(
         output_path_details[1],
         output_path_details[2],
-        `https://${output.host}.s3.${config.REGION}.amazonaws.com/${output.path}nodejs.zip`
+        `https://${output.host}.s3.${config.REGION}.amazonaws.com/${output.path}nodejstmp.zip`
       );
       if (boilerPlateResponse.statusCode == 200) {
         await getS3Objects(
@@ -78,6 +85,8 @@ export const handler = async (event) => {
   } catch (err) {
     console.log(`Error encountered :: ${err}`);
     throw err;
+  } finally {
+    deleteS3Objects(output.host, `${output.path}nodejstmp.zip`);
   }
 };
 
