@@ -12,15 +12,23 @@ import {
   ZipFile,
   getProtoPaths,
   extractFile,
-  clearDirectory,
   copyFiles,
 } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
 import { s3Events } from "../lib/constants.js";
 import { InvokeBoilerPlateLambda } from "../lib/invokeBoilerplateLambda.js";
 import { config } from "../config.js";
-const tmp = os.tmpdir();
+import * as fs from "fs";
 const unique_id = uuidv4();
+
+const tmp = path.join(os.tmpdir(), unique_id);
+if (!fs.existsSync(tmp)) {
+  fs.mkdirSync(tmp, { recursive: true });
+} else {
+  fs.rmdirSync(tmp, { recursive: true });
+  fs.mkdirSync(tmp, { recursive: true });
+}
+
 const base = path.join(tmp, `${unique_id}_download`);
 const temporary_paths = {
   base: base,
@@ -31,8 +39,17 @@ const temporary_paths = {
 
 export const handler = async (event) => {
   try {
+    const nodeTargetPath = `${os.tmpdir()}/node_modules`;
+    if (!fs.existsSync(nodeTargetPath)) {
+      const nodePath = path.resolve("./node_modules");
+      if (!fs.existsSync(nodeTargetPath)) {
+        fs.mkdirSync(nodeTargetPath, { recursive: true });
+      }
+      await copyFiles(nodePath, nodeTargetPath);
+    }
+
     console.log(`Generate proto :: ${JSON.stringify(event)}`);
-    await clearDirectory(tmp);
+
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       var output = getHostAndKeyFromUrl(event[s3Events.OUTPUT_S3_PATH]);
     }
@@ -45,7 +62,8 @@ export const handler = async (event) => {
     for (var i = 0; i < proto_paths.length; i++) {
       await extractStubs(
         proto_paths[i].replace("/tmp", "."),
-        path.join(temporary_paths.result, "stubs")
+        path.join(temporary_paths.result, "stubs"),
+        nodeTargetPath
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
@@ -91,6 +109,7 @@ export const handler = async (event) => {
     console.log(`Error encountered :: ${err}`);
     throw err;
   } finally {
+    fs.rmdirSync(tmp, { recursive: true });
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       deleteS3Objects(output.host, `${output.path}nodejstmp.zip`);
     }
