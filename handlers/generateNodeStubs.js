@@ -128,10 +128,3 @@ const upload_result_to_s3 = async (bucket, key, file) => {
   await ZipFile(temporary_paths.result, temporary_paths.upload);
   await putS3Objects(bucket, key, temporary_paths.upload);
 };
-
-const a = handler({
-  input_s3_path:
-    "s3://ropsten-service-components/assets/mozi/RajeevExampleService/proto_extracted/",
-  output_s3_path:
-    "s3://ropsten-service-components/assets/mozi/RajeevExampleService/temp_stubs/",
-});
