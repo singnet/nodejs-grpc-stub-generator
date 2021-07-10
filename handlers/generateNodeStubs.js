@@ -13,6 +13,7 @@ import {
   getProtoPaths,
   extractFile,
   copyFiles,
+  logFilePermissions,
 } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
 import { s3Events } from "../lib/constants.js";
@@ -41,12 +42,19 @@ export const handler = async (event) => {
   try {
     const nodeTargetPath = `${os.tmpdir()}/node_modules`;
     if (!fs.existsSync(nodeTargetPath)) {
+      console.log("Copying node_modules into temp location");
       const nodePath = path.resolve("./node_modules");
       if (!fs.existsSync(nodeTargetPath)) {
         fs.mkdirSync(nodeTargetPath, { recursive: true });
       }
       await copyFiles(nodePath, nodeTargetPath);
     }
+
+    fs.chmodSync(nodeTargetPath, 0o777);
+    logFilePermissions(
+      nodeTargetPath,
+      `Permission for --> ${nodeTargetPath} --> `
+    );
 
     console.log(`Generate proto :: ${JSON.stringify(event)}`);
 
@@ -120,3 +128,10 @@ const upload_result_to_s3 = async (bucket, key, file) => {
   await ZipFile(temporary_paths.result, temporary_paths.upload);
   await putS3Objects(bucket, key, temporary_paths.upload);
 };
+
+const a = handler({
+  input_s3_path:
+    "s3://ropsten-service-components/assets/mozi/RajeevExampleService/proto_extracted/",
+  output_s3_path:
+    "s3://ropsten-service-components/assets/mozi/RajeevExampleService/temp_stubs/",
+});
