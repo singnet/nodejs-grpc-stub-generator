@@ -41,7 +41,7 @@ const temporary_paths = {
 };
 
 export const handler = async (event) => {
-  try {  
+  try {
     const nodeTargetPath = `${os.tmpdir()}/node_modules`;
     if (!fs.existsSync(nodeTargetPath)) {
       console.log("Copying node_modules into temp location");
@@ -72,13 +72,19 @@ export const handler = async (event) => {
     for (var i = 0; i < proto_paths.length; i++) {
       await extractStubs(
         proto_paths[i].replace("/tmp", "."),
-        path.join(temporary_paths.result, `${event[s3Events.SERVICE_ID]}-grpc-stubs`),
+        path.join(
+          temporary_paths.result,
+          `${event[s3Events.SERVICE_ID]}-grpc-stubs`
+        ),
         nodeTargetPath
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       //adding extracted proto into proto folder
-      const protoOutputPath = path.join(temporary_paths.result, `${event[s3Events.SERVICE_ID]}-proto`);
+      const protoOutputPath = path.join(
+        temporary_paths.result,
+        `${event[s3Events.SERVICE_ID]}-proto`
+      );
       await copyFiles(temporary_paths.base, protoOutputPath);
 
       //upload generated nodejs stubs to S3
@@ -103,11 +109,17 @@ export const handler = async (event) => {
         );
         await extractFile(
           temporary_paths.boilerplate,
-          path.join(temporary_paths.result, `${event[s3Events.SERVICE_ID]}-boilerplate`)
+          path.join(
+            temporary_paths.result,
+            `${event[s3Events.SERVICE_ID]}-boilerplate`
+          )
         );
       }
       //prepare readme
-      await writeTextFile(temporary_paths.readme, readmeInstructions(`${event[s3Events.SERVICE_ID]}`))
+      await writeTextFile(
+        temporary_paths.readme,
+        readmeInstructions(`${event[s3Events.SERVICE_ID]}`)
+      );
       //upload generated nodejs boilerplate and stubs to S3
       await upload_result_to_s3(
         output.host,
