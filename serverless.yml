@@ -8,7 +8,7 @@ provider:
   region: ${file(./config.${self:provider.stage}.json):REGION}
   stage: ${opt:stage,'dev'}
   deploymentBucket:
-    name: snet-serverless-artifacts
+    name: ${file(./config.${self:provider.stage}.json):DEPLOYMENT_BUCKET}   
     serverSideEncryption: AES256
     tags:
       key1: nodestubs
