@@ -14,9 +14,10 @@ import {
   extractFile,
   copyFiles,
   logFilePermissions,
+  writeTextFile,
 } from "../lib/fileutils.js";
 import { extractStubs } from "../lib/stubscriptutils.js";
-import { s3Events } from "../lib/constants.js";
+import { s3Events, readmeInstructions } from "../lib/constants.js";
 import { InvokeBoilerPlateLambda } from "../lib/invokeBoilerplateLambda.js";
 import { config } from "../config.js";
 import * as fs from "fs";
@@ -36,6 +37,7 @@ const temporary_paths = {
   upload: path.join(tmp, `${unique_id}_upload.zip`),
   result: path.join(tmp, `${unique_id}_nodejs`),
   boilerplate: path.join(tmp, `${unique_id}_boilerplate.zip`),
+  readme: path.join(tmp, `${unique_id}_nodejs`, "readme.txt"),
 };
 
 export const handler = async (event) => {
@@ -70,13 +72,19 @@ export const handler = async (event) => {
     for (var i = 0; i < proto_paths.length; i++) {
       await extractStubs(
         proto_paths[i].replace("/tmp", "."),
-        path.join(temporary_paths.result, "stubs"),
+        path.join(
+          temporary_paths.result,
+          `${event[s3Events.SERVICE_ID]}-grpc-stubs`
+        ),
         nodeTargetPath
       );
     }
     if (event[s3Events.OUTPUT_S3_PATH].length > 0) {
       //adding extracted proto into proto folder
-      const protoOutputPath = path.join(temporary_paths.result, "proto");
+      const protoOutputPath = path.join(
+        temporary_paths.result,
+        `${event[s3Events.SERVICE_ID]}-proto`
+      );
       await copyFiles(temporary_paths.base, protoOutputPath);
 
       //upload generated nodejs stubs to S3
@@ -101,10 +109,17 @@ export const handler = async (event) => {
         );
         await extractFile(
           temporary_paths.boilerplate,
-          path.join(temporary_paths.result, "boilerplate")
+          path.join(
+            temporary_paths.result,
+            `${event[s3Events.SERVICE_ID]}-boilerplate`
+          )
         );
       }
-
+      //prepare readme
+      await writeTextFile(
+        temporary_paths.readme,
+        readmeInstructions(`${event[s3Events.SERVICE_ID]}`)
+      );
       //upload generated nodejs boilerplate and stubs to S3
       await upload_result_to_s3(
         output.host,
